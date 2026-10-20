@@ -1,5 +1,23 @@
 # Verificação da entrega
 
+## Atualização 3.0 — Academia + Cindy
+
+17 testes de lógica passaram, incluindo compatibilidade do esquema v2 → v3, pontuação de rodadas/repetições, desfazer, limites do cronômetro, pausa/retomada, validação de circuito concluído e de rascunho, três variantes e recursos de cache atualizados.
+
+A regressão da interface de academia também passou. A suíte adicional `circuit-browser-tests.cjs` verificou em Edge com IndexedDB real:
+
+- Atualização de estado v2 preservando perfil editado, cargas, histórico, medida e rascunho A.
+- Abas Academia/Fora da academia e contagem de uma rodada + uma repetição.
+- Desfazer lançamento, pausar, recarregar, retomar e finalizar com pausas.
+- Registro separado do circuito sem barra e histórico conjunto com a academia.
+- Expiração real de um rascunho próximo ao limite: bloqueio de novas reps e duração final de 20 minutos.
+- Exportação/importação de backup v3 contendo circuitos sem duplicar as quatro sessões da fixture.
+- Ausência de erros JavaScript e de transbordamento nas larguras 390/1280.
+
+O navegador recebe arquivos por interceptação local; esses testes não verificam publicação real ou service worker instalado. Para executá-los, use a mesma configuração de `browser-tests.cjs`, com `node circuit-browser-tests.cjs`. Valores de teste ficam apenas em perfis temporários e não acompanham o estado inicial da entrega.
+
+As verificações abaixo documentam a base anterior e continuam cobertas pela regressão.
+
 Data: 20/10/2026.
 
 ## Aprovado automaticamente

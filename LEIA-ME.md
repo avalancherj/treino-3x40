@@ -1,4 +1,6 @@
-# Treino 3×40 — versão 2
+# Treino 3×40 — versão 3
+
+**Atualização Academia + Cindy:** veja [ATUALIZAR.md](ATUALIZAR.md) para publicar sobre o site existente e receber a versão nova no celular. Em Treinar, use as abas Academia / Fora da academia.
 
 Aplicativo pessoal Full Body em HTML, CSS e JavaScript, sem dependências de execução, anúncios, conta, assinatura, analytics ou serviços remotos. Os dados ficam no dispositivo. O código e os ícones estão completos nesta pasta. Não é necessário compilar.
 
@@ -44,7 +46,7 @@ IndexedDB e caches são locais e podem ser removidos ao limpar dados ou pelo sis
 ## Publicar gratuitamente em HTTPS — GitHub Pages
 
 1. Crie uma conta gratuita no GitHub e um repositório **público**, por exemplo `treino-3x40`.
-2. Envie `index.html`, `app.js`, `data.js`, `style.css`, `manifest.webmanifest`, `sw.js` e a pasta `icons/` para a raiz da branch `main`. Não envie seus backups pessoais. Não é preciso enviar testes ou servidor.
+2. Envie `index.html`, `app.js`, `data.js`, `style.css`, `manifest.webmanifest`, `sw.js`, `circuit.js` e a pasta `icons/` para a raiz da branch `main`. Não envie seus backups pessoais. Não é preciso enviar testes ou servidor.
 3. Em **Settings → Pages**, selecione **Deploy from a branch**, branch **main**, pasta **/(root)**, e salve.
 4. Aguarde a publicação e abra o endereço exibido, normalmente `https://SEU-USUARIO.github.io/treino-3x40/`.
 5. Mantenha **Enforce HTTPS** ativado. Importe seu backup no novo endereço.
@@ -65,7 +67,7 @@ Para atualizar uma publicação, altere o identificador `CACHE` em `sw.js` e pub
 
 ## Organização
 
-`index.html`: estrutura e metadados; `style.css`: interface responsiva; `app.js`: telas e interações; `data.js`: modelos, validação, migração e IndexedDB; `sw.js`: cache offline; `manifest.webmanifest`: instalação; `icons/`: ícones PNG 180, 192 e 512, incluindo maskable; `server.mjs`: servidor de desenvolvimento; `tests.mjs`: testes de lógica e cache; `browser-tests.cjs`: testes de interface opcionais.
+`index.html`: estrutura e metadados; `style.css`: interface responsiva; `app.js`: telas e interações; `data.js`: modelos, validação, migração e IndexedDB; `circuit.js`: variantes, contagem e telas do Cindy; `sw.js`: cache offline; `manifest.webmanifest`: instalação; `icons/`: ícones PNG 180, 192 e 512, incluindo maskable; `server.mjs`: servidor de desenvolvimento; `tests.mjs`: testes de lógica e cache; `browser-tests.cjs`: testes de interface opcionais.
 
 ## Verificações
 
