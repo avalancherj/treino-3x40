@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {fresh,validate,migrate,duration,legacyDraft} from './data.js';
+let checks=0;function test(name,fn){fn();checks++;console.log('OK',name);}
+test('perfil inicial e planos completos',()=>{const d=validate(fresh());assert.equal(d.profile.height,172);assert.equal(d.plans.length,3);assert.equal(d.profile.initialWeight,76);});
+const old={sessions:[{date:'2026-10-01T13:00:00.000Z',plan:0,minutes:34,sets:{'0-0':true},loads:{0:'25'}}],measures:[{date:'2026-10-01T13:00:00.000Z',weight:76,waist:85}],profile:{height:172,goal:83},drafts:{0:{sets:{'0-0':true},loads:{0:'25'},started:null,elapsed:1500,paused:true}}};
+test('migração sem alterar fonte nem histórico',()=>{const before=JSON.stringify(old),d=migrate(old);assert.deepEqual(d.sessions,old.sessions);assert.equal(JSON.stringify(old),before);assert.equal(d.migration.key,'treino340_v1');assert.equal(d.plans.length,3);});
+test('rascunho antigo mantém cargas e séries sem inventar repetições',()=>{const d=legacyDraft(old.drafts[0],fresh().plans[0]);assert.equal(d.exercises[0].results[0].load,25);assert.equal(d.exercises[0].results[0].done,true);assert.equal(d.exercises[0].results[0].unknown,true);});
+test('cronômetro pausa, retoma e sobrevive à recarga',()=>{assert.equal(duration({elapsed:5000,started:10000,paused:false},16000),11000);assert.equal(duration({elapsed:11000,started:null,paused:true},50000),11000);assert.equal(duration({elapsed:11000,started:50000,paused:false},54000),15000);});
+test('backup novo e antigo aceitos',()=>{assert.equal(validate(JSON.parse(JSON.stringify(fresh()))).version,2);assert.equal(validate(old).sessions.length,1);});
+test('rejeita registros inválidos antes da escrita',()=>{for(const mutate of [d=>d.sessions.push({date:'x',plan:0,minutes:2}),d=>d.profile.height=0,d=>d.measures.push({date:'2026-01-01',weight:-3}),d=>d.plans[0].ex[0].sets=100,d=>d.schedule.push({id:'x',date:'invalid',plan:0}),d=>d.drafts={0:{elapsed:-1}}]){const d=fresh();mutate(d);assert.throws(()=>validate(d));}});
+test('sessão registra valores por série e prescrição independente',()=>{const d=fresh(),e=structuredClone(d.plans[0].ex[0]);e.results=[{done:true,reps:10,load:30}];d.sessions.push({id:'s',date:new Date().toISOString(),plan:0,minutes:40,exercises:[e]});d.plans[0].ex[0].name='Alterado';assert.equal(validate(d).sessions[0].exercises[0].name,'Leg press');});
+test('manifest e ícones PNG instaláveis',()=>{const m=JSON.parse(fs.readFileSync(new URL('./manifest.webmanifest',import.meta.url)));assert.equal(m.display,'standalone');for(const icon of m.icons){const buf=fs.readFileSync(new URL(icon.src,import.meta.url));const size=Number(icon.sizes.split('x')[0]);assert.equal(buf.readUInt32BE(16),size);assert.equal(buf.readUInt32BE(20),size);}});
+const handlers={},stored=new Map();let network=false;
+const sandbox={self:{location:{origin:'https://test.local'},clients:{claim:async()=>{}},addEventListener:(k,v)=>handlers[k]=v},URL,Response,caches:{open:async()=>({addAll:async assets=>{for(const a of assets){assert.ok(fs.existsSync(new URL(a==='./'?'./index.html':a,import.meta.url)));stored.set(a,new Response(a));}}}),keys:async()=>['treino340-old','other-app'],delete:async k=>k==='treino340-old',match:async req=>stored.get(typeof req==='string'?req:new URL(req.url).pathname.replace('/','./'))?.clone()},fetch:async()=>{if(!network)throw Error('offline');return new Response('network');}};
+vm.runInNewContext(fs.readFileSync(new URL('./sw.js',import.meta.url),'utf8'),sandbox);
+let waiting;handlers.install({waitUntil:p=>waiting=p});await waiting;
+handlers.activate({waitUntil:p=>waiting=p});await waiting;
+checks++;console.log('OK service worker instala todos os recursos e ativa cache');
+let response;handlers.fetch({request:{method:'GET',url:'https://test.local/app.js',mode:'cors'},respondWith:p=>response=p});assert.equal(await (await response).text(),'./app.js');
+handlers.fetch({request:{method:'GET',url:'https://test.local/rota-desconhecida',mode:'navigate'},respondWith:p=>response=p});assert.equal(await (await response).text(),'./index.html');checks++;console.log('OK cache offline e fallback de navegação (simulação)');
+console.log(`${checks} testes concluídos.`);
